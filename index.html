@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lo-Fi Generator (Dice + Cards → Sheet Music)</title>
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- VexFlow for sheet music rendering -->
+  <script src="https://unpkg.com/vexflow@4.2.5/build/cjs/vexflow.js"></script>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div class="title">Lo-Fi Music Generator</div>
+        <div class="subtitle">d20 → measures • 2d6 → key • d6 → tempo • deck → notes/rests</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btnGenerate" class="btn primary">Generate (1-click)</button>
+      <button id="btnPlay" class="btn" disabled>Play</button>
+      <button id="btnStop" class="btn" disabled>Stop</button>
+      <button id="btnRegenerateFast" class="btn ghost">Instant Generate</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel left">
+      <h2>Run</h2>
+
+      <div class="row">
+        <div class="stat">
+          <div class="label">Measures (d20)</div>
+          <div id="outMeasures" class="value">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Key (2d6)</div>
+          <div id="outKey" class="value">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Tempo (d6)</div>
+          <div id="outTempo" class="value">—</div>
+        </div>
+      </div>
+
+      <h3>Dice</h3>
+      <div class="diceRow">
+        <div class="dieBlock">
+          <div class="dieLabel">d20</div>
+          <div id="dieD20" class="die d20">20</div>
+        </div>
+
+        <div class="dieBlock">
+          <div class="dieLabel">2d6</div>
+          <div class="dicePair">
+            <div id="die2D6A" class="die d6">6</div>
+            <div id="die2D6B" class="die d6">6</div>
+          </div>
+        </div>
+
+        <div class="dieBlock">
+          <div class="dieLabel">d6</div>
+          <div id="dieD6" class="die d6">6</div>
+        </div>
+      </div>
+
+      <h3>Deck Draw</h3>
+      <div class="deckArea">
+        <div class="deckStack">
+          <div class="card back"></div>
+          <div class="card back offset1"></div>
+          <div class="card back offset2"></div>
+        </div>
+
+        <div class="drawArea">
+          <div id="drawnCard" class="card face hidden">
+            <div class="corner tl">
+              <span class="rank">A</span>
+              <span class="suit">♥</span>
+            </div>
+            <div class="pip">♥</div>
+            <div class="corner br">
+              <span class="rank">A</span>
+              <span class="suit">♥</span>
+            </div>
+          </div>
+
+          <div class="drawMeta">
+            <div class="smallLabel">Last draw produced</div>
+            <div id="lastResult" class="mono">—</div>
+            <div class="smallLabel">Progress</div>
+            <div id="progress" class="mono">—</div>
+          </div>
+        </div>
+      </div>
+
+      <details class="rules">
+        <summary>Tables (from the PDF)</summary>
+        <div class="rulesInner">
+          <p class="small">
+            This implementation follows your mapping tables for key, tempo, pitch by rank,
+            rhythm by suit, and aces as rests. :contentReference[oaicite:3]{index=3}
+          </p>
+          <ul class="small">
+            <li><b>2d6 → key:</b> 2=A, 3=E, 4=F, 5=C, 6=G, 7=D, 8=B♭, 9=E♭, 10=A♭, 11=D♭, 12=G♭</li>
+            <li><b>d6 → tempo:</b> 1=60, 2=90, 3=108, 4=120, 5=156, 6=200</li>
+            <li><b>Rank → pitch:</b> 2=E, 3=F, 4=G, 5=A, 6=B, 7=C, 8=D, 9=E, 10=F, J=G, Q=A, K=B</li>
+            <li><b>Suit → duration:</b> ♥=whole, ♠=half, ♣=quarter, ♦=eighth</li>
+            <li><b>Aces:</b> rests of the same duration (whole/half/quarter/eighth)</li>
+          </ul>
+          <p class="small">
+            Assumption to make it playable/renderable: the music is in <b>4/4</b> and each measure is filled to 4 beats.
+            If a drawn duration would overflow the remaining beats in a measure, the app automatically “fits” it by
+            reducing to the largest duration that fits (e.g., half→quarter→eighth).
+          </p>
+        </div>
+      </details>
+    </section>
+
+    <section class="panel right">
+      <h2>Sheet Music</h2>
+      <div class="sheetWrap">
+        <div id="sheet" class="sheet"></div>
+      </div>
+
+      <div class="hint">
+        Tip: “Instant Generate” skips animations (useful if you roll 20 measures).
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="small">
+      Placeholder visuals by default. You can swap in real dice/card sprites later.
+    </div>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
